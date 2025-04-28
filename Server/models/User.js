@@ -3,24 +3,34 @@ import jwt from 'jsonwebtoken';
 import mongoose, { Schema } from 'mongoose';
 
 const userSchema = new Schema({
-    name: {
+    username: {
         type: String,
         required: true,
+        trim: true,
     },
     email: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        lowercase: true,
+        trim: true,
     },
     password: {
         type: String,
         required: true,
-    },
-    role: {
-        type: String,
-        enum: ['user', 'admin'],
-    },
+        minlength: 6,
+        avater: {
 
+        }
+    },
+    avatar: {
+        type: String,
+        default: '',
+    },
+    isOnline: {
+        type: Boolean,
+        default: false,
+    }
 }, {
     timestamps: true
 });
@@ -44,8 +54,7 @@ userSchema.methods.generateAccessToken = function () {
     return jwt.sign({
         id: this._id,
         email: this.email,
-        role: this.role,
-        name: this.name
+        username: this.name
     },
         process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: process.env.REFRESH_TOKEN_EXPIRY
