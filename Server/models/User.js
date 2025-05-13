@@ -30,6 +30,10 @@ const userSchema = new Schema({
     isOnline: {
         type: Boolean,
         default: false,
+    },
+    isOffline: {
+        type: Boolean,
+        default: false,
     }
 }, {
     timestamps: true
@@ -43,7 +47,7 @@ userSchema.pre('save', async function (next) {
     next();
 });
 
-userSchema.methods.isPasswordMatched = async function (password) {
+userSchema.methods.isPasswordCorrect = async function (password) {
     if (!password || !this.password) {
         throw new Error('Password or hashed password is missing');
     }
@@ -67,6 +71,16 @@ userSchema.methods.generateRefreshToken = function () {
     },
         process.env.REFRESH_TOKEN_SECRET, {
         expiresIn: process.env.REFRESH_TOKEN_EXPIRY
-    })
+    });
+}
+
+userSchema.methods.generateResetPasswordToken = function () {
+    return jwt.sign({
+        id: this._id,
+        email: this.email,
+    },
+        process.env.RESET_PASSWORD_TOKEN_SECRET, {
+        expiresIn: process.env.RESET_PASSWORD_EXPIRY
+    });
 }
 export const User = mongoose.model('User', userSchema);
